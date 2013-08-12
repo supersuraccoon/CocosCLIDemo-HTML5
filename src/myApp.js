@@ -103,7 +103,7 @@ var Helloworld = cc.Layer.extend({
         window.open("http://www.supersuraccoon-cocos2d.com", "supersuraccoon-cocos2d.com");
     },
     showVideo:function(sender) {
-        window.open("http://www.youtube.com/supersuraccoon", "youtube.com/supersuraccoon");
+        alert("Coming Soon");
     },
 });
 
