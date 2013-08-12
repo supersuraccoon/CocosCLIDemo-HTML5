@@ -100,7 +100,7 @@ var Helloworld = cc.Layer.extend({
         this.infoLabel.setString(this.moreString);
     },
     showSite:function(sender) {
-        window.open("http://www.supersuraccoon-cocos2d.com", "supersuraccoon-cocos2d.com");
+        window.open("http://www.supersuraccoon-cocos2d.com/2013/08/12/cocosclilayer-html5-on-github/", "supersuraccoon-cocos2d.com");
     },
     showVideo:function(sender) {
         alert("Coming Soon");
