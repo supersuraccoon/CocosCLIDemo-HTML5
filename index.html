@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="CocosCLILayer-HTML5 : CocosCLILayer-HTML5" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>CocosCLILayer-HTML5</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/supersuraccoon/CocosCLIDemo-HTML5">View on GitHub</a>
+
+          <h1 id="project_title">CocosCLILayer-HTML5</h1>
+          <h2 id="project_tagline">CocosCLILayer-HTML5</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/supersuraccoon/CocosCLIDemo-HTML5/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/supersuraccoon/CocosCLIDemo-HTML5/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><strong>A inner command line layer for cocos2d project.</strong></p>
+
+<p><strong>What you can do with CLILayer:</strong></p>
+
+<ul>
+<li>
+<p>Live Log output: </p>
+
+<p>You can output log to CLILayer where you can check at run time (without IDE)</p>
+</li>
+<li>
+<p>Live Obj Property Query: </p>
+
+<p>You can use po command to print any object properties at run time</p>
+</li>
+<li>
+<p>Live Cocos2d API editor: </p>
+
+<p>You can use any cocos2d API at run time (ex: add sprite, run action, modify sprite property)</p>
+</li>
+<li>
+<p>Live Logic Controller: </p>
+
+<p>You can change hack into the game and change the game flow at run time (ex: cheater, add timer, etc)</p>
+</li>
+<li>
+<p>Cross Platfrom:</p>
+
+<p>This script is 100% compatible with cocos2d(iphone/x) project (Using SpiderMonkey + JSBinding)</p>
+</li>
+</ul><p><strong>Samples:</strong></p>
+
+<ul>
+<li>
+<p>Live Log output: </p>
+
+<p>Code Snippet: </p>
+
+<p><code>cliLayer.addLog("LogInfo", CLI_LOG_TYPE_INFO);</code></p>
+
+<p>Command Type: </p>
+
+<p>CLI_LOG_TYPE_INFO, </p>
+
+<p>CLI_LOG_TYPE_WARNNING, </p>
+
+<p>CLI_LOG_TYPE_ERROR, </p>
+
+<p>CLI_LOG_TYPE_COMMAND, </p>
+
+<p>CLI_LOG_TYPE_PO</p>
+</li>
+<li>
+<p>Live Obj Property Query: </p>
+
+<p>Code Snippet: </p>
+
+<p>po this.getPosition()</p>
+
+<p>Code Snippet: </p>
+
+<p>po this.getColor()</p>
+</li>
+<li>
+<p>Live Cocos2d API editor: </p>
+
+<p>Code Snippet: </p>
+
+<p><code>cc.Sprite.create("xxx.png"); this.addChild(this.co);</code></p>
+</li>
+<li>
+<p>Live Logic Controller:</p>
+
+<p>Code Snippet: </p>
+
+<p><code>this.restartGame();</code> //restartGame is game logic function</p>
+</li>
+<li>
+<p>Cross Platform:</p>
+
+<p>Check the cocos2d-x version project: </p>
+
+<p>Coming Soon</p>
+
+<p>Check the cocos2d-iphone version project: </p>
+
+<p>Coming Soon</p>
+</li>
+</ul><p><strong>More:</strong></p>
+
+<ul>
+<li><p>Anything you type into the edit box will be treated as command automatically</p></li>
+<li><p>The command return value (if any) will the stored in: this.co (CLI Object)</p></li>
+<li><p>"this" here refers to the "CLILayer" and that's the only object you can use directly</p></li>
+<li><p>Basically, you need to use functions like "getChildByTag" to reach other objects or you can pass the object to CLILayer from c++ (SpiderMonkey+JSB)</p></li>
+</ul><p><strong>Things to improve:</strong></p>
+
+<ul>
+<li><p>Now the log info view only support single line</p></li>
+<li><p>Now the command line edit box only support single line (not single command)</p></li>
+<li><p>Unknown bugs for sure</p></li>
+</ul><p><strong>If you have any thoughts about this project, drop me a message at my site :)</strong></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">CocosCLILayer-HTML5 maintained by <a href="https://github.com/supersuraccoon">supersuraccoon</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
