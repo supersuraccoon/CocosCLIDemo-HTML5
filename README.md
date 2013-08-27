@@ -2,6 +2,15 @@ CocosCLILayer-HTML5
 ===================
 
 A inner command line layer for cocos2d project.
+
+UPDATE:
+
+2013.8.17
+. Add po command (similar to po in xcode)
+
+2013.8.27
+. Add a log info layer (using clippingnode) to show po result in a "tree format"
+. Add key event (arrow up / arrow down / enter) for quick command browser and command execute  
    
 
 What you can do with CLILayer:
@@ -28,61 +37,7 @@ What you can do with CLILayer:
 This script is 100% compatible with cocos2d(iphone/x) project (Using SpiderMonkey + JSBinding)
 
 
-
-Samples:
-
-.Live Log output:
-
-Code Snippet:
-
-cliLayer.addLog("LogInfo", CLI_LOG_TYPE_INFO);
- 
-Command Type:
-
-CLI_LOG_TYPE_INFO,
-
-CLI_LOG_TYPE_WARNNING,
-
-CLI_LOG_TYPE_ERROR,
-
-CLI_LOG_TYPE_COMMAND,
-
-CLI_LOG_TYPE_PO
-
-.Live Obj Property Query:
-
-Code Snippet:
-
-po this.getPosition()
-
-Code Snippet:
-
-po this.getColor()
-
-.Live Cocos2d API editor:
- 
-Code Snippet:
- 
-cc.Sprite.create("xxx.png"); this.addChild(this.co);
-
-.Live Logic Controller:
- 
-Code Snippet:
- 
-this.restartGame(); //restartGame is game logic function
-
-.Cross Platform:
- 
-Check the cocos2d-x version project:
- 
-Coming Soon
-  
-Check the cocos2d-iphone version project:
- 
-Coming Soon
-
-
-More:
+Attension:
 
 .Anything you type into the edit box will be treated as command automatically
 
@@ -101,4 +56,5 @@ Things to improve:
 .Unknown bugs for sure
 
 
-If you have any thoughts about this project, drop me a message at my site :)
+Live Demo:
+www.supersuraccoon-cocos2d.com/CocosJSBLab/CocosJSBLab-HTML5/

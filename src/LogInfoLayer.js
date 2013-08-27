@@ -51,6 +51,7 @@ var LogInfoLayer = cc.LayerColor.extend({
     },
     addString:function (content) {
     	this.removeAllContent();
+        this._contentLayer.setPosition(cc.p(0, this._layerHeight - this._contentHeight));
     	var contentLabel = cc.LabelTTF.create(content, "Arial", 18);
 		contentLabel.setAnchorPoint(cc.p(0, 0.5));
 		contentLabel.setPosition(cc.p(10, 1000 - 30));
@@ -59,8 +60,9 @@ var LogInfoLayer = cc.LayerColor.extend({
     },
     addDictObject:function (contentDict) {
     	this.removeAllContent();
+        this._contentLayer.setPosition(cc.p(0, this._layerHeight - this._contentHeight));
     	var resultArray = new Array();
-    	iterProperty(contentDict, 2, resultArray)
+    	iterProperty(contentDict, 3, resultArray)
     	for (var i = 0 ; i < resultArray.length; i++) {
     		var a = resultArray[i];
     		var contentLabel = cc.LabelTTF.create(a.name + (a.value == null ? "" : " - " + a.value), "Arial", 18);

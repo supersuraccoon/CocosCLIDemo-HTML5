@@ -35,12 +35,6 @@
       Code Snippet: this.restartGame(); //restartGame is game logic function
     . Cross Platfrom:
       Check the cocos2d-x version project: https://github.com
-      
-    Update:
-    2013.8.13:
-    . add po command
-    
-    2013.8.27
 */
 
 // constants
@@ -125,8 +119,8 @@ var CLILayer = cc.LayerColor.extend({
         this._createCLIBox();
         this._createMenu();
         
-    	this._logInfoLayer = LogInfoLayer.createLogInfoLayer(this, 300, height, 300, 1000);
-    	this._logInfoLayer.setPosition(cc.p(width - 300, 0));
+    	this._logInfoLayer = LogInfoLayer.createLogInfoLayer(this, 600, height, 600, 1000);
+    	this._logInfoLayer.setPosition(cc.p(width - 600, 0));
     	this._logInfoLayer.setScale(0);
         this.addChild(this._logInfoLayer, 999, 999);
         
