@@ -73,7 +73,52 @@ function ObjToSource(o) {
     if (na) return "{"+str.slice(0,-1)+"}";
     else return "["+str.slice(0,-1)+"]";
 };
-
+function iterProperty (o, limit, res) {
+	if (!o) return;
+	if (!ObjToSource.level) 
+		ObjToSource.level = 0;
+	ObjToSource.level ++;
+	if (ObjToSource.level > limit) {
+		ObjToSource.level --;
+		ObjToSource.check.pop();
+		return;	
+	}
+	if (typeof(o) == "object") {
+		if (!ObjToSource.check) 
+            ObjToSource.check = new Array();
+        for (var i = 0, k = ObjToSource.check.length; i < k; i++) {
+            if (ObjToSource.check[i] == o) {
+            	ObjToSource.level --;
+            	return '{}';
+            }
+        }
+        ObjToSource.check.push(o);
+    }
+    for(var p in o) {
+        if (typeof o[p] == "object") {
+        	var a = new Array();
+        	a.name = p;
+        	a.value = null;
+        	a.level = ObjToSource.level;
+        	res.push(a);
+        	this.iterProperty(o[p], limit, res);
+        }
+        else if (typeof o[p] == "function") {
+        	continue;
+        }
+        else {
+        	var a = new Array();
+        	a.name = p;
+        	a.value = o[p];
+        	a.level = ObjToSource.level;
+        	res.push(a);
+        }
+    }
+    if (typeof(o) == "object") { 
+    	ObjToSource.level --;
+    	ObjToSource.check.pop();
+    }
+};
 function newFilledArray(length, val) {
     var array = [];
     for (var i = 0; i < length; i++) {

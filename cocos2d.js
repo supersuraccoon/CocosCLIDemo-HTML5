@@ -41,7 +41,8 @@
             'src/Helper.js',
             'src/resource.js',
             'src/myApp.js',
-            'src/CLILayer.js'
+            'src/CLILayer.js',
+            'src/LogInfoLayer.js',
         ]
     };
 

@@ -1,4 +1,4 @@
-/*
+	/*
     Author: 
     SuperSuRaccoon
     
@@ -35,6 +35,12 @@
       Code Snippet: this.restartGame(); //restartGame is game logic function
     . Cross Platfrom:
       Check the cocos2d-x version project: https://github.com
+      
+    Update:
+    2013.8.13:
+    . add po command
+    
+    2013.8.27
 */
 
 // constants
@@ -65,12 +71,16 @@ var CLI_LOG_TYPE_ERROR = 3;
 var CLI_LOG_TYPE_COMMAND = 4;
 var CLI_LOG_TYPE_PO = 5;
 
+// command
+var CLI_COMMAND_HISTORY_LENGTH = 10;
+
 // log data
 var LogInfoData = function () {
     this.orgString = "";
     this.showString = "";
     this.page = 0;
     this.tag = 0;
+    this.commandResult = null;
 };
 LogInfoData.create = function (orgString, showString, page, tag, logType) {
     var logInfoData = new LogInfoData();    
@@ -79,6 +89,7 @@ LogInfoData.create = function (orgString, showString, page, tag, logType) {
     logInfoData.page = page;
     logInfoData.tag = tag;
     logInfoData.logType = logType;
+    logInfoData.commandResult = new Array();
     return logInfoData;
 };
 
@@ -89,19 +100,22 @@ var CLILayer = cc.LayerColor.extend({
 		this._super();
     },	
 	init:function (width, height) {
-        cc.LayerColor.prototype.init.call(this, CLI_LAYER_COLOR, width, height);
-        
+        cc.LayerColor.prototype.init.call(this, CLI_LAYER_COLOR, width, height);        
         // touch
         if( 'mouse' in sys.capabilities )
             this.setMouseEnabled(true);
         if( 'touches' in sys.capabilities )
             this.setTouchEnabled(true);
+        if( 'keyboard' in sys.capabilities )
+            this.setKeyboardEnabled(true);
         
         // cli object, store the last result of command (if not null)
         this.co = null;
         
         // member
         this.logArray = new Array();
+        this.commandHistoryArray = new Array();
+        this.commandHistoryIndex = 0;
         this.totalHeight = CLI_LOG_TOP_PADDING;
         this.curPage = 1;
         this.totalPage = 1;
@@ -110,6 +124,11 @@ var CLILayer = cc.LayerColor.extend({
         this._createCLIInfo();
         this._createCLIBox();
         this._createMenu();
+        
+    	this._logInfoLayer = LogInfoLayer.createLogInfoLayer(this, 300, height, 300, 1000);
+    	this._logInfoLayer.setPosition(cc.p(width - 300, 0));
+    	this._logInfoLayer.setScale(0);
+        this.addChild(this._logInfoLayer, 999, 999);
         
 		return true;	
 	},
@@ -126,7 +145,40 @@ var CLILayer = cc.LayerColor.extend({
         var labelData = this._logDataFromTouch(loc);
         if (labelData) {
             cc.log(labelData.tag);
+            // show detail log
+            if (labelData.commandResult != null) {
+            	this._logInfoLayer.runAction(cc.ScaleTo.create(0.1, 1.0));
+            	this._logInfoLayer.addDictObject(labelData.commandResult);
+            	return;
+            }
         }
+    },
+    // keyboard
+    onKeyUp:function(key) {
+    	// up
+    	if (key == 38) {
+    		if (this.commandHistoryIndex + 1 > this.commandHistoryArray.length - 1)
+    			this.commandHistoryIndex = 0;
+    		else
+    			this.commandHistoryIndex ++;
+    		this._CLIBox.setText(this.commandHistoryArray[this.commandHistoryIndex]);
+    	}
+    	// down
+    	if (key == 40) {
+    		if (this.commandHistoryIndex - 1  < 0)
+    			this.commandHistoryIndex = this.commandHistoryArray.length - 1;
+    		else
+    			this.commandHistoryIndex --;
+    		this._CLIBox.setText(this.commandHistoryArray[this.commandHistoryIndex]);
+    	}
+    	// enter
+    	if (key == 13) {
+            var command = this._CLIBox.getText();
+            this.addLog(command, CLI_LOG_TYPE_COMMAND);
+            this._CLIBox.setText("");
+    	}
+    },
+    onKeyDown:function(key) {
     },
     // UI
     _createCLIInfo:function () {
@@ -173,8 +225,7 @@ var CLILayer = cc.LayerColor.extend({
             return hasLineBreak ? logInfo + "......" : logInfo;
         }
     },
-    _logDataFromTouch:function(loc) {
-        loc = this.convertToNodeSpace(loc);          
+    _logDataFromTouch:function(loc) {          
         for (var i in this.logArray) {
             var logData = this.logArray[i];
             if (logData.page == this.curPage) {
@@ -250,10 +301,13 @@ var CLILayer = cc.LayerColor.extend({
         this.addChild(label, 1, logData.tag);
         this._updateCLIInfo();
     },
-    _executeCommand:function (command) {
+    _executeCommand:function (logData) {
+    	var command = logData.orgString;
+    	this.commandHistoryArray.push(command);
         try  {
             // special command
             if (command.beginsWith("po ")) {
+            	logData.commandResult = eval(command.substring(3));
                 eval("this.addLog(ObjToSource(" + command.substring(3) + "), 5)");
             }
             else {
@@ -284,7 +338,9 @@ var CLILayer = cc.LayerColor.extend({
     // delegate
     editBoxEditingDidBegin: function (editBox) {},
     editBoxEditingDidEnd: function (editBox) {},
-    editBoxTextChanged: function (editBox, text) {},
+    editBoxTextChanged: function (editBox, text) {
+    	cc.log(text);
+    },
     editBoxReturn: function (editBox) {
         var command = this._CLIBox.getText();
         this.addLog(command, CLI_LOG_TYPE_COMMAND);
@@ -299,7 +355,7 @@ var CLILayer = cc.LayerColor.extend({
         this.logArray.push(logData);
         this._updateLogPosition(logData);
         if (logType == CLI_LOG_TYPE_COMMAND)
-            this._executeCommand(logInfo);
+            this._executeCommand(logData);
     }
 });
 
