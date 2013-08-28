@@ -11,6 +11,11 @@ UPDATE:
 2013.8.27
 . Add a log info layer (using clippingnode) to show po result in a "tree format"
 . Add key event (arrow up / arrow down / enter) for quick command browser and command execute  
+
+2013.8.29
+. Add a log info layer for listing members
+. Add a log info layer for listing object functions
+. Add po "cocos2d class" support for listing class members and functions
    
 
 What you can do with CLILayer:
