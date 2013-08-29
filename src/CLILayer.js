@@ -1,43 +1,20 @@
-	/*
-    Author: 
-    SuperSuRaccoon
-    
-    Date:   
-    2013/8/5
-    
-    Name:   
-    CLILayer
-    
-    Desc:   
-    A inner command line layer for coocs2d project.
-    What you can do with CLILayer:
-    . Live Log output: 
-      You can output log to CLILayer where you can check at run time (without IDE)
-    . Live Obj Property Query: 
-      You can use po command to print any object properties at run time
-    . Live Cocos2d API editor: 
-      You can use any cocos2d API at run time (ex: add sprite, run action, modify sprite property)
-    . Live Logic Controller: 
-      You can change hack into the game and change the game flow at run time (ex: cheater, add timer, etc)
-    . Cross Platfrom:
-      This script is 100% compatible with cocos2d(iphone/x) project (Using SpiderMonkey + JSBinding)
-      
-    Ex:
-    . Live Log output: 
-      Code Snippet: cliLayer.addLog("LogInfo", CLI_LOG_TYPE_INFO);
-      Command Type: CLI_LOG_TYPE_INFO, CLI_LOG_TYPE_WARNNING, CLI_LOG_TYPE_ERROR, CLI_LOG_TYPE_COMMAND, CLI_LOG_TYPE_PO
-    . Live Obj Property Query: 
-      Code Snippet: po this.getPosition()
-      Code Snippet: po this.getColor()
-    . Live Cocos2d API editor: 
-      Code Snippet: cc.Sprite.create("xxx.png"); this.addChild(this.co);
-    . Live Logic Controller:
-      Code Snippet: this.restartGame(); //restartGame is game logic function
-    . Cross Platfrom:
-      Check the cocos2d-x version project: https://github.com
-*/
+/**
+*    Author: 
+*    SuperSuRaccoon  -- 2013/8/5
+*    
+*    Desc:   
+*    A inner command line layer for coocs2d project.
+*    What you can do with CLILayer:
+*    . Live Log output: 
+*    . Live Obj Property Query: 
+*    . Live Cocos2d API editor: 
+*    . Live Logic Controller: 
+*    . Cross Platfrom:
+**/
 
-// constants
+/**
+	Constants for CLILayer 
+*/
 var CLI_FONT_NAME = "Verdana";
 var CLI_FONT_SIZE = 18;
 var CLI_LAYER_COLOR = cc.c4b(19, 19, 19, 200);
@@ -51,30 +28,34 @@ var CLI_LOG_LINE_SPACE = 5;
 
 var CLI_EDITBOX_SPRITE_NAME = "res/EditBox.png";
 var CLI_EDITBOX_HEIGHT = 30;
+var CLI_EDITBOX_LEFT_PADDING = 30;
 var CLI_EDITBOX_FONT_COLOR = cc.BLACK;
 
-// tag
+var CLI_POPUP_MENU_HEIGHT = 50;
+
 var CLI_INFO_TAG = 1;
 var CLI_EDITBOX_TAG = 2;
 var CLI_LOG_BASE_TAG = 100;
 
-// log type
 var CLI_LOG_TYPE_INFO = 1;
 var CLI_LOG_TYPE_WARNNING = 2;
 var CLI_LOG_TYPE_ERROR = 3;
 var CLI_LOG_TYPE_COMMAND = 4;
 var CLI_LOG_TYPE_PO = 5;
 
-// command
 var CLI_COMMAND_HISTORY_LENGTH = 10;
 
-// log data
+/**
+	Log data 
+*/
 var LogInfoData = function () {
     this.orgString = "";
     this.showString = "";
     this.page = 0;
     this.tag = 0;
     this.commandResult = null;
+    this.poaResultDict = null;
+    this.pofResultDict = null;
 };
 LogInfoData.create = function (orgString, showString, page, tag, logType) {
     var logInfoData = new LogInfoData();    
@@ -87,15 +68,18 @@ LogInfoData.create = function (orgString, showString, page, tag, logType) {
     return logInfoData;
 };
 
-// cli layer
+/**
+	CLILayer main class 
+*/
 var CLILayer = cc.LayerColor.extend({
     ctor:function () {
         cc.associateWithNative( this, cc.LayerColor );
 		this._super();
     },	
 	init:function (width, height) {
-        cc.LayerColor.prototype.init.call(this, CLI_LAYER_COLOR, width, height);        
-        // touch
+    	cc.LayerColor.prototype.init.call(this, CLI_LAYER_COLOR, width, height);        
+        
+    	// touch
         if( 'mouse' in sys.capabilities )
             this.setMouseEnabled(true);
         if( 'touches' in sys.capabilities )
@@ -115,37 +99,76 @@ var CLILayer = cc.LayerColor.extend({
         this.totalPage = 1;
         
         // component
+        cc.MenuItemFont.setFontSize(CLI_FONT_SIZE);
+        cc.MenuItemFont.setFontName(CLI_FONT_NAME);
+    	
+        this._createFrame();
         this._createCLIInfo();
         this._createCLIBox();
-        this._createMenu();
-        
-    	this._logInfoLayer = LogInfoLayer.createLogInfoLayer(this, 600, height, 600, 1000);
-    	this._logInfoLayer.setPosition(cc.p(width - 600, 0));
-    	this._logInfoLayer.setScale(0);
-        this.addChild(this._logInfoLayer, 999, 999);
+        this._createLogMenu();
+        this._createCLIMenu();
+        this._createPopupMenu();
+        this._createPoaLogLayer();
+        this._createPofLogLayer();
         
 		return true;	
 	},
-    // touch
+	// cli menu
+	_showPopupMenu:function () {
+		if (this._isPopupMenuShowing) {
+			this._isPopupMenuShowing = false
+			this._popupMenuLayer.runAction(cc.ScaleTo.create(0.1, 0));
+		}
+		else {
+			this._isPopupMenuShowing = true;
+			this._popupMenuLayer.runAction(cc.ScaleTo.create(0.1, 1.0));
+		}
+	},
+	_showPoaLogLayer:function () {
+		if (this._isPoaLogLayerShowing) {
+			this._isPoaLogLayerShowing = false
+			this._poaLogInfoLayer.runAction(cc.ScaleTo.create(0.1, 0));
+		}
+		else {
+			this._isPoaLogLayerShowing = true;
+			this._poaLogInfoLayer.runAction(cc.ScaleTo.create(0.1, 1.0));
+		}
+	},
+	_showPofLogLayer:function () {
+		if (this._isPofLogLayerShowing) {
+			this._isPofLogLayerShowing = false
+			this._pofLogInfoLayer.runAction(cc.ScaleTo.create(0.1, 0));
+		}
+		else {
+			this._isPofLogLayerShowing = true;
+			this._pofLogInfoLayer.runAction(cc.ScaleTo.create(0.1, 1.0));
+		}
+	},
+	// Interact - mouse, touch, keyboard
+	_handleTouch:function (location) {
+//		if (this._isPoaLogLayerShowing)
+//    		return;
+        var labelData = this._logDataFromTouch(location);
+        if (labelData) {
+            // show detail log
+            if (labelData.logType == CLI_LOG_TYPE_COMMAND && labelData.commandResult != null) {
+            	this._poaLogInfoLayer.addDictObject(labelData.poaResultDict);
+            	this._pofLogInfoLayer.addDictObject(labelData.pofResultDict);
+            	return;
+            }
+        }
+	},
+	// touch
     onTouchesBegan:function (touches, event) {
-    },
+		this._handleTouch(this.convertToNodeSpace(touches[0]));
+	},
     onTouchesMoved:function (touches, event) {
     },
     onTouchesEnded:function (touches, event) {
     },
     // mouse
     onMouseDown:function (event) {
-        var loc = this.convertToNodeSpace(event.getLocation());
-        var labelData = this._logDataFromTouch(loc);
-        if (labelData) {
-            cc.log(labelData.tag);
-            // show detail log
-            if (labelData.commandResult != null) {
-            	this._logInfoLayer.runAction(cc.ScaleTo.create(0.1, 1.0));
-            	this._logInfoLayer.addDictObject(labelData.commandResult);
-            	return;
-            }
-        }
+    	this._handleTouch(this.convertToNodeSpace(event.getLocation()));
     },
     // keyboard
     onKeyUp:function(key) {
@@ -174,7 +197,33 @@ var CLILayer = cc.LayerColor.extend({
     },
     onKeyDown:function(key) {
     },
-    // UI
+ 	// UI - create, update component
+    _createPoaLogLayer:function () {
+    	this._isPoaLogLayerShowing = false;
+    	var width = this.getContentSize().width / 2;
+    	var height = this.getContentSize().height;
+    	this._poaLogInfoLayer = LogInfoLayer.createLogInfoLayer(this, width, height, width, 1000);
+    	this._poaLogInfoLayer.setScale(0);
+        this.addChild(this._poaLogInfoLayer, 999);
+    },
+    _createPofLogLayer:function () {
+    	this._isPofLogLayerShowing = false;
+    	var width = this.getContentSize().width / 2;
+    	var height = this.getContentSize().height;
+    	this._pofLogInfoLayer = LogInfoLayer.createLogInfoLayer(this, width, height, width, 1000);
+    	this._pofLogInfoLayer.setPosition(cc.p(width, 0));
+    	this._pofLogInfoLayer.setScale(0);
+        this.addChild(this._pofLogInfoLayer, 999);
+    },
+    _createFrame:function() {
+    	var rectangle = [cc.p(0, 0),
+                         cc.p(this.getContentSize().width, 0),
+                         cc.p(this.getContentSize().width, this.getContentSize().height),
+                         cc.p(0, this.getContentSize().height)];
+        var frameSprite = FrameSprite.create(rectangle, 2);
+        frameSprite.setColor(cc.WHITE);
+        this.addChild(frameSprite);
+    },
     _createCLIInfo:function () {
         this._cliInfo = cc.LabelTTF.create("", CLI_FONT_NAME, CLI_FONT_SIZE);
         this._cliInfo.setPosition(cc.p(this.getContentSize().width * 1 / 3, this.getContentSize().height - 10));
@@ -183,16 +232,15 @@ var CLILayer = cc.LayerColor.extend({
     },
     _createCLIBox:function () {
         var cliBoxSprite = cc.Scale9Sprite.create(CLI_EDITBOX_SPRITE_NAME);
-        this._CLIBox = cc.EditBox.create(cc.size(this.getContentSize().width, CLI_EDITBOX_HEIGHT), cliBoxSprite);
+        this._CLIBox = cc.EditBox.create(cc.size(this.getContentSize().width - CLI_EDITBOX_LEFT_PADDING, CLI_EDITBOX_HEIGHT), cliBoxSprite);
+        this._CLIBox.setPosition(cc.p(CLI_EDITBOX_LEFT_PADDING, 0));
         this._CLIBox.setPlaceHolder("Input Command Here ~");
         this._CLIBox.setAnchorPoint(cc.p(0, 0));
         this._CLIBox.setDelegate(this);
         this._CLIBox.setFontColor(CLI_EDITBOX_FONT_COLOR);
         this.addChild(this._CLIBox, 1, CLI_EDITBOX_TAG);
     },
-    _createMenu:function () {
-        cc.MenuItemFont.setFontSize(CLI_FONT_SIZE);
-        cc.MenuItemFont.setFontName(CLI_FONT_NAME);
+    _createLogMenu:function () {
         var leftArrow = cc.MenuItemFont.create("PRE", this._prePage, this);
         var rightArrow = cc.MenuItemFont.create("NEXT", this._nextPage, this);
         var clearLog = cc.MenuItemFont.create("CLEAR", this._clearLog, this);
@@ -201,11 +249,48 @@ var CLILayer = cc.LayerColor.extend({
         menu.alignItemsHorizontallyWithPadding(20);
         this.addChild(menu);
     },
-    // Info
+    _createCLIMenu:function () {
+    	var entranceMenuItem = cc.MenuItemFont.create("O", this._showPopupMenu, this);
+    	entranceMenuItem.setAnchorPoint(cc.p(0.5, 0));
+        var menu = cc.Menu.create(entranceMenuItem);
+        menu.setPosition(cc.p(CLI_EDITBOX_LEFT_PADDING / 2, 5));
+        this.addChild(menu);
+    },
+    _createPopupMenu:function () {
+    	this._popupMenuLayer = cc.LayerColor.create(cc.c4b(0, 0, 0, 10), CLI_EDITBOX_LEFT_PADDING, CLI_POPUP_MENU_HEIGHT);
+    	this._popupMenuLayer.setPosition(cc.p(0, CLI_EDITBOX_HEIGHT));
+    	this._popupMenuLayer.setScale(0);
+    	this._isPopupMenuShowing = false;
+    	this.addChild(this._popupMenuLayer, 999, 999);
+    	var menuItem1 = cc.MenuItemFont.create("P", this._showPoaLogLayer, this);
+    	var menuItem2 = cc.MenuItemFont.create("F", this._showPofLogLayer, this);
+    	var menuItem3 = cc.MenuItemFont.create("S", this._popupMenu, this);
+        var menu = cc.Menu.create(menuItem1, menuItem2, menuItem3);
+        menu.alignItemsVerticallyWithPadding(0);
+        menu.setPosition(cc.p(CLI_EDITBOX_LEFT_PADDING / 2, CLI_POPUP_MENU_HEIGHT / 2));
+        this._popupMenuLayer.addChild(menu);
+    },
     _updateCLIInfo:function () {
         this._cliInfo.setString("Log Count: " + this.logArray.length + " --- Page: " + this.curPage + "/" + this.totalPage);
     },
-    // helper
+    _updateLogPosition:function (logData) {
+        var label = cc.LabelTTF.create(logData.showString, CLI_FONT_NAME, CLI_FONT_SIZE);
+        label.setAnchorPoint(cc.p(0, 0.5));
+        label.setColor(this._colorForLogType(logData.logType));
+        if (this.totalHeight + CLI_LOG_BOTTOM_PADDING > this.getContentSize().height) {
+            this.totalHeight = CLI_LOG_TOP_PADDING;
+            this._clearLogForPage(this.curPage);
+            this.curPage ++;
+            this.totalPage ++;
+            logData.page ++;
+        }
+		// label._fontClientHeight
+        this.totalHeight += 20 + CLI_LOG_LINE_SPACE;
+        label.setPosition(cc.p(CLI_LOG_LEFT_PADDING, this.getContentSize().height - this.totalHeight));
+        this.addChild(label, 1, logData.tag);
+        this._updateCLIInfo();
+    },    
+	// Helper
     _makeLogString:function(logInfo) {
         var hasLineBreak = false;
         if (logInfo.indexOf("\n") != -1) {
@@ -239,6 +324,58 @@ var CLILayer = cc.LayerColor.extend({
             }
         }
     },
+    _moveToPage:function(page) {
+        if (page == this.curPage) return;
+        if (page > this.totalPage || page < 1) return;
+        this._clearLogForPage(this.curPage);
+        this.totalHeight = CLI_LOG_TOP_PADDING;
+        // add lavelTTF for newPage
+        for (var i in this.logArray) {
+            var logData = this.logArray[i];
+            if (logData.page == page) {
+                this._updateLogPosition(logData);
+            }
+        }
+        this.curPage = page;
+        this._updateCLIInfo();
+    },
+    _executeCommand:function (logData) {
+    	var command = logData.orgString;
+    	this.commandHistoryArray.push(command);
+        try  {
+            // special command
+            if (command.beginsWith("po ")) {
+            	if (command.beginsWith("po cc.")) {
+            		logData.commandResult = eval(command.substring(3) + ".prototype");
+                    eval("this.addLog(ObjToSource(" + command.substring(3) + ".prototype" + "), 5)");
+                    // parse result
+                    logData.poaResultDict = new Array();
+                    logData.pofResultDict = new Array();
+                    ExtractObject(logData.commandResult, 1, logData.poaResultDict, 2);
+                    ExtractObject(logData.commandResult, 1, logData.pofResultDict, 1);
+            	}
+            	else {
+            		logData.commandResult = eval(command.substring(3));
+                    eval("this.addLog(ObjToSource(" + command.substring(3) + "), 5)");
+                    // parse result
+                    logData.poaResultDict = new Array();
+                    logData.pofResultDict = new Array();
+                    ExtractObject(logData.commandResult, 2, logData.poaResultDict, 2);
+                    ExtractObject(logData.commandResult, 1, logData.pofResultDict, 1);	
+            	}
+            	this._poaLogInfoLayer.addDictObject(logData.poaResultDict);
+            	this._pofLogInfoLayer.addDictObject(logData.pofResultDict);
+            }
+            else {
+                var ret = eval(command);
+                if (ret)
+                    this.co = ret;
+            }
+        }
+        catch(exception) {
+            this.addLog(exception.message, CLI_LOG_TYPE_ERROR);
+        }
+    },
     _logTimeStamp:function () {
         var d = new Date(new Date().getTime());
         var hour = d.getHours();
@@ -262,58 +399,7 @@ var CLILayer = cc.LayerColor.extend({
         if (logType == CLI_LOG_TYPE_PO) return "[P]";
         return "[X]";
     },
-    // Control
-    _moveToPage:function(page) {
-        if (page == this.curPage) return;
-        if (page > this.totalPage || page < 1) return;
-        this._clearLogForPage(this.curPage);
-        this.totalHeight = CLI_LOG_TOP_PADDING;
-        // add lavelTTF for newPage
-        for (var i in this.logArray) {
-            var logData = this.logArray[i];
-            if (logData.page == page) {
-                this._updateLogPosition(logData);
-            }
-        }
-        this.curPage = page;
-        this._updateCLIInfo();
-    },
-    _updateLogPosition:function (logData) {
-        var label = cc.LabelTTF.create(logData.showString, CLI_FONT_NAME, CLI_FONT_SIZE);
-        label.setAnchorPoint(cc.p(0, 0.5));
-        label.setColor(this._colorForLogType(logData.logType));
-        if (this.totalHeight + CLI_LOG_BOTTOM_PADDING > this.getContentSize().height) {
-            this.totalHeight = CLI_LOG_TOP_PADDING;
-            this._clearLogForPage(this.curPage);
-            this.curPage ++;
-            this.totalPage ++;
-            logData.page ++;
-        }
-		// label._fontClientHeight
-        this.totalHeight += 20 + CLI_LOG_LINE_SPACE;
-        label.setPosition(cc.p(CLI_LOG_LEFT_PADDING, this.getContentSize().height - this.totalHeight));
-        this.addChild(label, 1, logData.tag);
-        this._updateCLIInfo();
-    },
-    _executeCommand:function (logData) {
-    	var command = logData.orgString;
-    	this.commandHistoryArray.push(command);
-        try  {
-            // special command
-            if (command.beginsWith("po ")) {
-            	logData.commandResult = eval(command.substring(3));
-                eval("this.addLog(ObjToSource(" + command.substring(3) + "), 5)");
-            }
-            else {
-                var ret = eval(command);
-                if (ret)
-                    this.co = ret;
-            }
-        }
-        catch(exception) {
-            this.addLog(exception.message, CLI_LOG_TYPE_ERROR);
-        }
-    },
+    
     // menu
     _prePage:function () {
         this._moveToPage(this.curPage - 1);
@@ -329,11 +415,20 @@ var CLILayer = cc.LayerColor.extend({
         this.totalHeight = CLI_LOG_TOP_PADDING;
         this._updateCLIInfo();
     },
-    // delegate
-    editBoxEditingDidBegin: function (editBox) {},
-    editBoxEditingDidEnd: function (editBox) {},
+    // edit box delegate
+    editBoxEditingDidBegin: function (editBox) {
+    	if (this._isPoaLogLayerShowing)
+    		this._poaLogInfoLayer.updateOpacity(50);
+    	if (this._isPofLogLayerShowing)
+    		this._pofLogInfoLayer.updateOpacity(50);
+    },
+    editBoxEditingDidEnd: function (editBox) {
+    	if (this._isPoaLogLayerShowing)
+    		this._poaLogInfoLayer.updateOpacity(150);
+    	if (this._isPofLogLayerShowing)
+    		this._pofLogInfoLayer.updateOpacity(150);
+    },
     editBoxTextChanged: function (editBox, text) {
-    	cc.log(text);
     },
     editBoxReturn: function (editBox) {
         var command = this._CLIBox.getText();

@@ -73,50 +73,62 @@ function ObjToSource(o) {
     if (na) return "{"+str.slice(0,-1)+"}";
     else return "["+str.slice(0,-1)+"]";
 };
-function iterProperty (o, limit, res) {
+
+// extractType: 0 - all, 1 - function 2 - property
+function ExtractObject (o, limit, resultArray, extractType) {
 	if (!o) return;
-	if (!ObjToSource.level) 
-		ObjToSource.level = 0;
-	ObjToSource.level ++;
-	if (ObjToSource.level > limit) {
-		ObjToSource.level --;
-		ObjToSource.check.pop();
+	if (!ExtractObject.level) 
+		ExtractObject.level = 0;
+	ExtractObject.level ++;
+	if (ExtractObject.level > limit) {
+		ExtractObject.level --;
+		ExtractObject.check.pop();
 		return;	
 	}
 	if (typeof(o) == "object") {
-		if (!ObjToSource.check) 
-            ObjToSource.check = new Array();
-        for (var i = 0, k = ObjToSource.check.length; i < k; i++) {
-            if (ObjToSource.check[i] == o) {
-            	ObjToSource.level --;
+		if (!ExtractObject.check) 
+            ExtractObject.check = new Array();
+        for (var i = 0, k = ExtractObject.check.length; i < k; i++) {
+            if (ExtractObject.check[i] == o) {
+            	ExtractObject.level --;
             	return '{}';
             }
         }
-        ObjToSource.check.push(o);
+        ExtractObject.check.push(o);
     }
     for(var p in o) {
         if (typeof o[p] == "object") {
-        	var a = new Array();
-        	a.name = p;
-        	a.value = null;
-        	a.level = ObjToSource.level;
-        	res.push(a);
-        	this.iterProperty(o[p], limit, res);
+        	if (extractType == 2) {
+        		var a = new Array();
+            	a.name = p;
+            	a.value = null;
+            	a.level = ExtractObject.level;
+            	resultArray.push(a);
+            	ExtractObject(o[p], limit, resultArray, extractType);	
+        	}
         }
         else if (typeof o[p] == "function") {
-        	continue;
+        	if (extractType == 1) {
+        		var a = new Array();
+            	a.name = p;
+            	a.value = "function";
+            	a.level = ExtractObject.level;
+            	resultArray.push(a);	
+        	}
         }
         else {
-        	var a = new Array();
-        	a.name = p;
-        	a.value = o[p];
-        	a.level = ObjToSource.level;
-        	res.push(a);
+        	if (extractType == 2) {
+	        	var a = new Array();
+	        	a.name = p;
+	        	a.value = o[p];
+	        	a.level = ExtractObject.level;
+	        	resultArray.push(a);
+        	}
         }
     }
     if (typeof(o) == "object") { 
-    	ObjToSource.level --;
-    	ObjToSource.check.pop();
+    	ExtractObject.level --;
+    	ExtractObject.check.pop();
     }
 };
 function newFilledArray(length, val) {

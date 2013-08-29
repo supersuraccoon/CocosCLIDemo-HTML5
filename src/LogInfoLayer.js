@@ -16,7 +16,7 @@ var LogInfoLayer = cc.LayerColor.extend({
     	this._contentWidth = contentWidth;
     	this._contentHeight = contentHeight;
     	
-    	cc.LayerColor.prototype.init.call(this, cc.c4b(100, 100, 100, 200), this._layerWidth, this._layerHeight);        
+    	cc.LayerColor.prototype.init.call(this, cc.c4b(0, 0, 0, 150), this._layerWidth, this._layerHeight);        
 
     	// enable touch
         this.setTouchEnabled(true);
@@ -31,26 +31,39 @@ var LogInfoLayer = cc.LayerColor.extend({
         this._clipper = cc.ClippingNode.create();
         this._clipper.setContentSize(cc.size(this._layerWidth, this._layerHeight));
         this.addChild(this._clipper);
-
+        
         var stencil = cc.DrawNode.create();
         var rectangle = [cc.p(0, 0),
                          cc.p(this._clipper.getContentSize().width, 0),
                          cc.p(this._clipper.getContentSize().width, this._clipper.getContentSize().height),
                          cc.p(0, this._clipper.getContentSize().height)];
-        stencil.drawPoly(rectangle, 4, cc.c4f(1, 1, 1, 0), 1);
+        stencil.drawPoly(rectangle, 4, cc.c4f(0, 0, 0, 1), 1);
         this._clipper.setStencil(stencil);
         this._clipper.addChild(this._contentLayer);
+        
+        this._createFrame();
+        
         this.setTouchEnabled(true);
     	return true;
     },
-    removeAllContent:function () {
+    _createFrame:function() {
+    	var rectangle = [cc.p(0, 0),
+                         cc.p(this.getContentSize().width, 0),
+                         cc.p(this.getContentSize().width, this.getContentSize().height),
+                         cc.p(0, this.getContentSize().height)];
+        var frameSprite = FrameSprite.create(rectangle, 1);
+        frameSprite.setColor(cc.WHITE);
+        this.addChild(frameSprite);
+    },
+    _removeAllContent:function () {
     	for (var i = 0; i < this._contentLabelArray.length; i++) {
     		var contentLabel = this._contentLabelArray[i];
     		contentLabel.removeFromParent(true);
     	}
     },
+    // interface
     addString:function (content) {
-    	this.removeAllContent();
+    	this._removeAllContent();
         this._contentLayer.setPosition(cc.p(0, this._layerHeight - this._contentHeight));
     	var contentLabel = cc.LabelTTF.create(content, "Arial", 18);
 		contentLabel.setAnchorPoint(cc.p(0, 0.5));
@@ -58,18 +71,23 @@ var LogInfoLayer = cc.LayerColor.extend({
         this._contentLayer.addChild(contentLabel);
         this._contentLabelArray.push(contentLabel);
     },
-    addDictObject:function (contentDict) {
-    	this.removeAllContent();
+    addDictObject:function (content) {
+    	this._removeAllContent();
         this._contentLayer.setPosition(cc.p(0, this._layerHeight - this._contentHeight));
-    	var resultArray = new Array();
-    	iterProperty(contentDict, 3, resultArray)
-    	for (var i = 0 ; i < resultArray.length; i++) {
-    		var a = resultArray[i];
+    	for (var i = 0 ; i < content.length; i++) {
+    		var a = content[i];
     		var contentLabel = cc.LabelTTF.create(a.name + (a.value == null ? "" : " - " + a.value), "Arial", 18);
     		contentLabel.setAnchorPoint(cc.p(0, 0.5));
     		contentLabel.setPosition(cc.p(10 + a.level * 20, 1000 - 30 * (i + 1)));
             this._contentLayer.addChild(contentLabel);
             this._contentLabelArray.push(contentLabel);
+    	}
+    },
+    updateOpacity:function (opacity) {
+    	this.setOpacity(opacity);
+    	for (var i = 0; i < this._contentLabelArray.length; i++) {
+    		var contentLabel = this._contentLabelArray[i];
+    		contentLabel.setOpacity(opacity);
     	}
     },
     onTouchesBegan:function (touches, event) {

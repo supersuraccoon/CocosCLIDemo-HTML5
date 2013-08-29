@@ -43,6 +43,7 @@
             'src/myApp.js',
             'src/CLILayer.js',
             'src/LogInfoLayer.js',
+            'src/ShapeSprite.js'
         ]
     };
 
