@@ -264,9 +264,8 @@ var CLILayer = cc.LayerColor.extend({
     	this.addChild(this._popupMenuLayer, 999, 999);
     	var menuItem1 = cc.MenuItemFont.create("P", this._showPoaLogLayer, this);
     	var menuItem2 = cc.MenuItemFont.create("F", this._showPofLogLayer, this);
-    	var menuItem3 = cc.MenuItemFont.create("S", this._popupMenu, this);
-        var menu = cc.Menu.create(menuItem1, menuItem2, menuItem3);
-        menu.alignItemsVerticallyWithPadding(0);
+        var menu = cc.Menu.create(menuItem1, menuItem2);
+        menu.alignItemsVerticallyWithPadding(5);
         menu.setPosition(cc.p(CLI_EDITBOX_LEFT_PADDING / 2, CLI_POPUP_MENU_HEIGHT / 2));
         this._popupMenuLayer.addChild(menu);
     },
