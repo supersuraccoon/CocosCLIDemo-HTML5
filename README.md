@@ -3,6 +3,8 @@ CocosCLILayer-HTML5
 
 A inner command line layer for cocos2d project.
 
+[A live demo is here.](http://supersuraccoon.github.io/CocosCLIDemo-HTML5/)
+
 UPDATE:
 
 2013.8.17
@@ -60,6 +62,3 @@ Things to improve:
 
 .Unknown bugs for sure
 
-
-Live Demo:
-www.supersuraccoon-cocos2d.com/CocosJSBLab/CocosJSBLab-HTML5/
